@@ -84,20 +84,25 @@ jobs:
             */*-resume.pdf
           retention-days: 90
           
-      - name: Commit PDFs to repository
+      - name: Commit PDFs and README to repository
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
+          # Add PDFs
           DIRS="${{ steps.find_dirs.outputs.dirs }}"
           for dir in $DIRS; do
             git add "$dir/${dir}-resume.pdf" || true
           done
           
+          # Add README
+          git add README.md || true
+          
+          # Check if there are any changes
           if git diff --staged --quiet; then
-            echo "No PDF changes to commit"
+            echo "No changes to commit"
           else
-            git commit -m "chore: auto-update compiled resume PDFs [skip ci]"
+            git commit -m "chore: auto-update compiled PDFs and README [skip ci]"
             git push
           fi
           
@@ -222,17 +227,38 @@ jobs:
           
           echo "✅ README.md generated successfully"
           
-      - name: Commit and push README
+      - name: Commit PDFs and README to repository
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          git pull --rebase
+          # Fetch latest changes
+          git fetch origin main
+          
+          # Add and commit README
           git add README.md
           
           if git diff --staged --quiet; then
             echo "No changes to README.md"
           else
-            git commit -m "docs: auto-update README with latest release info [skip ci]"
-            git push
+            # Try to pull with rebase, handle conflicts automatically
+            git pull --rebase origin main || true
+            
+            # If there are conflicts in README, take ours (the new generated one)
+            if [ -f "README.md" ] && git status | grep -q "README.md"; then
+              git checkout --ours README.md
+              git add README.md
+            fi
+            
+            # Complete rebase if in progress
+            if git status | grep -q "rebase in progress"; then
+              git rebase --continue || true
+            fi
+            
+            # Commit if not already committed
+            if ! git diff --staged --quiet || git status | grep -q "nothing to commit"; then
+              git commit -m "docs: auto-update README with latest release info [skip ci]" || true
+            fi
+            
+            git push origin main
           fi
