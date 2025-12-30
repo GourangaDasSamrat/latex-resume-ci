@@ -1,0 +1,238 @@
+name: Compile LaTeX Resumes
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  
+jobs:
+  compile-resumes:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Find resume directories
+        id: find_dirs
+        run: |
+          # Find all directories containing main.tex (excluding common/)
+          RESUME_DIRS=$(find . -maxdepth 1 -type d -name "*" ! -name "." ! -name ".." ! -name ".git" ! -name "common" ! -name ".github" -exec test -f "{}/main.tex" \; -print | sed 's|./||' | tr '\n' ' ')
+          
+          if [ -z "$RESUME_DIRS" ]; then
+            echo "No resume directories found with main.tex"
+            exit 1
+          fi
+          
+          echo "Found resume directories: $RESUME_DIRS"
+          echo "dirs=$RESUME_DIRS" >> $GITHUB_OUTPUT
+          
+      - name: Compile LaTeX resumes
+        run: |
+          DIRS="${{ steps.find_dirs.outputs.dirs }}"
+          
+          for dir in $DIRS; do
+            echo "===================================="
+            echo "Compiling resume in: $dir"
+            echo "===================================="
+            
+            # Use Docker to compile LaTeX
+            docker run --rm \
+              -v "$(pwd):/workspace" \
+              -w "/workspace/$dir" \
+              ghcr.io/xu-cheng/texlive-full:latest \
+              latexmk -pdf -file-line-error -halt-on-error -interaction=nonstopmode main.tex
+            
+            # Check if PDF was generated
+            if [ -f "$dir/main.pdf" ]; then
+              echo "✓ Successfully compiled $dir/main.pdf"
+              # Create a copy with descriptive name
+              cp "$dir/main.pdf" "$dir/${dir}-resume.pdf"
+            else
+              echo "✗ Failed to compile $dir/main.pdf"
+              exit 1
+            fi
+          done
+          
+      - name: Prepare artifact list
+        id: prepare_artifacts
+        run: |
+          DIRS="${{ steps.find_dirs.outputs.dirs }}"
+          ARTIFACT_PATHS=""
+          
+          for dir in $DIRS; do
+            if [ -f "$dir/${dir}-resume.pdf" ]; then
+              ARTIFACT_PATHS="$ARTIFACT_PATHS$dir/${dir}-resume.pdf"$'\n'
+            fi
+          done
+          
+          echo "artifact_paths<<EOF" >> $GITHUB_OUTPUT
+          echo "$ARTIFACT_PATHS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+      - name: Upload PDFs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-resumes
+          path: |
+            */*-resume.pdf
+          retention-days: 90
+          
+      - name: Commit PDFs to repository
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          DIRS="${{ steps.find_dirs.outputs.dirs }}"
+          for dir in $DIRS; do
+            git add "$dir/${dir}-resume.pdf" || true
+          done
+          
+          if git diff --staged --quiet; then
+            echo "No PDF changes to commit"
+          else
+            git commit -m "chore: auto-update compiled resume PDFs [skip ci]"
+            git push
+          fi
+          
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%B %d, %Y at %H:%M UTC')" >> $GITHUB_OUTPUT
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Resume Build v${{ github.run_number }}
+          body: |
+            🎓 **Automated Resume Compilation**
+            
+            **Build:** #${{ github.run_number }}
+            **Date:** ${{ steps.date.outputs.date }}
+            **Commit:** ${{ github.sha }}
+            
+            **Changes:**
+            ${{ github.event.head_commit.message }}
+            
+            **📄 Compiled resumes:**
+            ${{ steps.find_dirs.outputs.dirs }}
+          files: |
+            */*-resume.pdf
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Generate Dynamic README
+        run: |
+          # Find all directories with main.tex
+          RESUME_DIRS=$(find . -maxdepth 1 -type d -name "*" ! -name "." ! -name ".." ! -name ".git" ! -name "common" ! -name ".github" -exec test -f "{}/main.tex" \; -print | sed 's|./||' | sort)
+          
+          # Get latest release info
+          LATEST_RELEASE="v${{ github.run_number }}"
+          REPO_URL="https://github.com/${{ github.repository }}"
+          
+          # Start generating README
+          cat > README.md << 'EOF'
+          # 📄 Resume Collection
+          
+          This repository contains my professional resumes, automatically compiled using GitHub Actions.
+          
+          ## 🚀 Available Resumes
+          
+          EOF
+          
+          # Add dynamic download links for each resume
+          for dir in $RESUME_DIRS; do
+            RESUME_NAME=$(echo "$dir" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
+            PDF_NAME="${dir}-resume.pdf"
+            
+            cat >> README.md << EOF
+          ### 📌 ${RESUME_NAME} Resume
+          
+          [![Download PDF](https://img.shields.io/badge/Download-PDF-red?style=for-the-badge&logo=adobe-acrobat-reader)](${REPO_URL}/releases/latest/download/${PDF_NAME})
+          [![View Source](https://img.shields.io/badge/View-Source-blue?style=for-the-badge&logo=latex)](./${dir}/main.tex)
+          
+          EOF
+          done
+          
+          # Add footer with build info
+          cat >> README.md << EOF
+          ---
+          
+          ## 📊 Build Information
+          
+          - **Latest Release:** [\`${LATEST_RELEASE}\`](${REPO_URL}/releases/latest)
+          - **Last Updated:** ${{ steps.date.outputs.date }}
+          - **Auto-compiled:** ✅ Yes, on every push to main
+          
+          ## 🛠️ Technical Details
+          
+          ### Structure
+          \`\`\`
+          /
+          $(for dir in $RESUME_DIRS; do echo "├── ${dir}/          # ${dir^} resume variant"; done)
+          ├── common/         # Shared LaTeX components
+          └── README.md       # This file (auto-generated)
+          \`\`\`
+          
+          ### Compilation
+          - **Engine:** LaTeX (latexmk with pdflatex)
+          - **CI/CD:** GitHub Actions
+          - **Distribution:** Releases are created automatically on every push
+          
+          ### How It Works
+          1. Push changes to \`main\` branch
+          2. GitHub Actions compiles all LaTeX files
+          3. PDFs are committed back to repository
+          4. A new release is created with downloadable PDFs
+          5. This README is automatically updated
+          
+          ## 📥 Download Options
+          
+          ### Latest Release (Recommended)
+          Download the most recent compiled versions from the [latest release](${REPO_URL}/releases/latest).
+          
+          ### Direct from Repository
+          $(for dir in $RESUME_DIRS; do
+            echo "- [\`${dir}-resume.pdf\`](./${dir}/${dir}-resume.pdf)"
+          done)
+          
+          ### All Releases
+          Browse all previous versions in the [releases page](${REPO_URL}/releases).
+          
+          ---
+          
+          <div align="center">
+          
+          **⭐ Star this repo if you find it useful!**
+          
+          ![Build Status](https://img.shields.io/github/actions/workflow/status/${{ github.repository }}/compile-resumes.yml?branch=main&style=flat-square)
+          ![Latest Release](https://img.shields.io/github/v/release/${{ github.repository }}?style=flat-square)
+          ![Last Commit](https://img.shields.io/github/last-commit/${{ github.repository }}?style=flat-square)
+          
+          </div>
+          EOF
+          
+          echo "✅ README.md generated successfully"
+          
+      - name: Commit and push README
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git pull --rebase
+          git add README.md
+          
+          if git diff --staged --quiet; then
+            echo "No changes to README.md"
+          else
+            git commit -m "docs: auto-update README with latest release info [skip ci]"
+            git push
+          fi
