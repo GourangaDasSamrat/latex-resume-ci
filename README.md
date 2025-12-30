@@ -4,6 +4,11 @@ This repository contains my professional resumes, automatically compiled using G
 
 ## 🚀 Available Resumes
 
+### 📌 Frontend Resume
+
+[![Download PDF](https://img.shields.io/badge/Download-PDF-red?style=for-the-badge&logo=adobe-acrobat-reader)](https://github.com/GourangaDasSamrat/latex-resume-ci/releases/latest/download/frontend-resume.pdf)
+[![View Source](https://img.shields.io/badge/View-Source-blue?style=for-the-badge&logo=latex)](./frontend/main.tex)
+
 ### 📌 Fullstack Resume
 
 [![Download PDF](https://img.shields.io/badge/Download-PDF-red?style=for-the-badge&logo=adobe-acrobat-reader)](https://github.com/GourangaDasSamrat/latex-resume-ci/releases/latest/download/fullstack-resume.pdf)
@@ -13,8 +18,8 @@ This repository contains my professional resumes, automatically compiled using G
 
 ## 📊 Build Information
 
-- **Latest Release:** [`v1`](https://github.com/GourangaDasSamrat/latex-resume-ci/releases/latest)
-- **Last Updated:** December 30, 2025 at 04:55 UTC
+- **Latest Release:** [`v3`](https://github.com/GourangaDasSamrat/latex-resume-ci/releases/latest)
+- **Last Updated:** December 30, 2025 at 19:14 UTC
 - **Auto-compiled:** ✅ Yes, on every push to main
 
 ## 🛠️ Technical Details
@@ -22,6 +27,7 @@ This repository contains my professional resumes, automatically compiled using G
 ### Structure
 ```
 /
+├── frontend/          # Frontend resume variant
 ├── fullstack/          # Fullstack resume variant
 ├── common/         # Shared LaTeX components
 └── README.md       # This file (auto-generated)
@@ -45,6 +51,7 @@ This repository contains my professional resumes, automatically compiled using G
 Download the most recent compiled versions from the [latest release](https://github.com/GourangaDasSamrat/latex-resume-ci/releases/latest).
 
 ### Direct from Repository
+- [`frontend-resume.pdf`](./frontend/frontend-resume.pdf)
 - [`fullstack-resume.pdf`](./fullstack/fullstack-resume.pdf)
 
 ### All Releases
