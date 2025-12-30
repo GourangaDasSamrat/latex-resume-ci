@@ -1,99 +1,17 @@
-\documentclass[letterpaper,11pt]{article}
-
-\usepackage{latexsym}
-\usepackage[empty]{fullpage}
-\usepackage{titlesec}
-\usepackage{marvosym}
-\usepackage[usenames,dvipsnames]{color}
-\usepackage{verbatim}
-\usepackage{enumitem}
-\usepackage[hidelinks]{hyperref}
-\usepackage{fancyhdr}
-\usepackage[english]{babel}
-\usepackage{tabularx}
-\input{glyphtounicode}
-
-% Font options
-\pagestyle{fancy}
-\fancyhf{} 
-\fancyfoot{}
-\renewcommand{\headrulewidth}{0pt}
-\renewcommand{\footrulewidth}{0pt}
-
-\addtolength{\oddsidemargin}{-0.5in}
-\addtolength{\evensidemargin}{-0.5in}
-\addtolength{\textwidth}{1in}
-\addtolength{\topmargin}{-.5in}
-\addtolength{\textheight}{1.0in}
-
-\urlstyle{same}
-\raggedbottom
-\raggedright
-\setlength{\tabcolsep}{0in}
-
-% Sections formatting
-\titleformat{\section}{
-  \vspace{-4pt}\scshape\raggedright\large
-}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
-
-\pdfgentounicode=1
-
-% Custom commands
-\newcommand{\resumeItem}[1]{
-  \item\small{
-    {#1 \vspace{-2pt}}
-  }
-}
-
-\newcommand{\resumeSubheading}[4]{
-  \vspace{-2pt}\item
-    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
-      \textbf{#1} & #2 \\
-      \textit{\small#3} & \textit{\small #4} \\
-    \end{tabular*}\vspace{-7pt}
-}
-
-\newcommand{\resumeProjectHeading}[2]{
-    \item
-    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
-      \small#1 & #2 \\
-    \end{tabular*}\vspace{-7pt}
-}
-
-\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
-\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
-\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
-\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
-\newcommand{\resumeItemListStart}{\begin{itemize}}
-\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
-
-%-------------------------------------------
-%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{../common/preamble}
+\input{../common/commands}
 
 \begin{document}
 
 %----------HEADING----------
+\input{../common/header}
+\vspace{1pt}
 \begin{center}
-    \textbf{\Huge \scshape Gouranga Das Samrat} \\ \vspace{1pt}
-    \small Full-Stack Developer \\ \vspace{1pt}
-    \small +880 1873 966 298 $|$ \href{mailto:gouranga.samrat@gmail.com}{gouranga.samrat@gmail.com} \\
-    \href{https://linkedin.com/in/yourusername}{\underline{Linkedin}} $|$ 
-    \href{https://yourportfolio.com}{\underline{Portfolio}} $|$ 
-    \href{https://github.com/yourusername}{\underline{GitHub}}
+    \small Full-Stack Developer
 \end{center}
 
 %-----------EXPERIENCE-----------
-\section{Experience}
-  \resumeSubHeadingListStart
-    \resumeSubheading
-      {Web Developer Intern}{September 2025 -- October 2025}
-      {Labmentix}{Remote}
-      \resumeItemListStart
-        \resumeItem{Built a Full-Stack Google Drive Clone using modern web technologies (MERN Stack).}
-        \resumeItem{Collaborated with team members to improve UI/UX design and optimize performance.}
-        \resumeItem{Gained hands-on experience in full-stack development workflow and Git-based version control.}
-      \resumeItemListEnd
-  \resumeSubHeadingListEnd
+\input{../common/experience}
 
 %-----------SKILLS-----------
 \section{Technical Skills}
@@ -133,19 +51,9 @@
     \resumeSubHeadingListEnd
 
 %-----------CERTIFICATIONS-----------
-\section{Certifications}
-    \resumeSubHeadingListStart
-      \resumeProjectHeading{\textbf{Software Engineer Intern} -- HackerRank}{}
-      \resumeProjectHeading{\textbf{Front End Development Libraries} -- freeCodeCamp}{}
-      \resumeProjectHeading{\textbf{JavaScript Algorithms and Data Structures} -- freeCodeCamp}{}
-    \resumeSubHeadingListEnd
+\input{../common/certifications}
 
 %-----------EDUCATION-----------
-\section{Education}
-  \resumeSubHeadingListStart
-    \resumeSubheading
-      {Khulna Government Model School \& College}{September 2025 -- Present}
-      {Higher Secondary Certificate (HSC)}{Khulna, Bangladesh}
-  \resumeSubHeadingListEnd
+\input{../common/education}
 
 \end{document}
