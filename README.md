@@ -18,8 +18,8 @@ This repository contains my professional resumes, automatically compiled using G
 
 ## 📊 Build Information
 
-- **Latest Release:** [`v5`](https://github.com/GourangaDasSamrat/latex-resume-ci/releases/latest)
-- **Last Updated:** February 02, 2026 at 16:19 UTC
+- **Latest Release:** [`v6`](https://github.com/GourangaDasSamrat/latex-resume-ci/releases/latest)
+- **Last Updated:** February 02, 2026 at 16:23 UTC
 - **Auto-compiled:** ✅ Yes, on every push to main
 
 ## 🛠️ Technical Details
